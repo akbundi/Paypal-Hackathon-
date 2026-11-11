@@ -1,9 +1,29 @@
+import json
 import uuid
 from datetime import datetime
+from pathlib import Path
+
 from app.approvals import trusted_contacts, notifications
 from app.spending_control import budget_manager
 
-_requests = {}
+# backend/approvals_data.json me data save hoga
+_FILE = Path(__file__).resolve().parents[2] / "approvals_data.json"
+
+
+def _load():
+    try:
+        with open(_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _save():
+    with open(_FILE, "w", encoding="utf-8") as f:
+        json.dump(_requests, f, indent=2)
+
+
+_requests = _load()
 
 
 def create_request(agent_id, amount, category, merchant, reason):
@@ -18,6 +38,7 @@ def create_request(agent_id, amount, category, merchant, reason):
         "status": "pending",
         "created_at": datetime.utcnow().isoformat(),
     }
+    _save()
     msg = (
         f"PayGuard: AI agent '{agent_id}' wants to pay ${amount} to "
         f"'{merchant}' ({category}). Request ID: {req_id}. Approve or reject."
@@ -44,4 +65,5 @@ def decide(req_id, approve):
     r["status"] = "approved" if approve else "rejected"
     if approve:
         budget_manager.record_spend(r["agent_id"], r["amount"], r["category"])
+    _save()
     return r

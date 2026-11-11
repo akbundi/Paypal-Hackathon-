@@ -4,3 +4,7 @@ __pycache__/
 data.json
 contacts_data.json
 __pycache__/
+budget_data.json
+agents_data.json
+categories_data.json
+approvals_data.json
