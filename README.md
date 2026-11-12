@@ -1,250 +1,121 @@
-# PayGuard Enterprise API
-
-Payment-fraud protection, policy engine, and multi-approver workflow built on the PayPal Developer Platform.
-
-Built with **FastAPI, PostgreSQL, asynchronous psycopg connection pooling, JWT authentication, and role-based access control (RBAC).**
-
-## Features
-
-- Real-time payment risk analysis
-- Rules-based fraud detection and policy engine
-- Multi-level payment approval workflows
-- Vendor fraud detection
-- Secure authentication and authorization
-- Organization-level tenant isolation
-- Tamper-evident audit logs
-- PayPal payment integration with simulation mode
-- HMAC-signed webhooks
-- Analytics and reporting
-
-## Quick Start (Docker)
-
-```bash
-cp .env.example .env
-```
-
-Configure `JWT_SECRET` and `ADMIN_KEY` in your `.env` file.
-
-```bash
-docker compose up --build
-```
-
-The API will run at:
-
-`http://localhost:8000`
-
-Interactive API documentation:
-
-`http://localhost:8000/docs`
-
-## Quick Start (Local)
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Configure environment variables:
-
-```bash
-export DATABASE_URL=postgresql://user:pass@localhost:5432/payguard
-export JWT_SECRET=your-secret-key
-export ADMIN_KEY=dev-admin
-```
-
-Start the application:
-
-```bash
-uvicorn main:app --reload
-```
-
-Database tables are created automatically during application startup.
-
-## Payment Processing
-
-PayGuard supports two payment modes:
-
-**Simulation Mode**
-
-- Works without PayPal credentials.
-- Generates simulated `SIM-` order IDs.
-- Supports payment workflows for demonstration and testing.
-
-**PayPal Sandbox Mode**
-
-Configure the following environment variables to enable PayPal Sandbox integration:
-
-```env
-PAYPAL_CLIENT_ID=your-client-id
-PAYPAL_CLIENT_SECRET=your-client-secret
-```
-
-## Authentication & User Management
-
-PayGuard uses Argon2id password hashing and JWT-based authentication.
-
-- Access tokens expire after 15 minutes.
-- Refresh tokens expire after 14 days.
-- Refresh token rotation and session revocation.
-- Account lockout after five failed login attempts.
-- Password change, reset, and recovery.
-- Email verification.
-- Single-use organization invitations valid for seven days.
-- Soft account deactivation.
-- Organization-level data isolation.
-
-### User Roles
-
-| Role | Permissions |
-|---|---|
-| Owner | Full organization access |
-| Admin | Administrative access with privileged-role restrictions |
-| Approver | Review, approve, and decline payments |
-| Member | Create payments and view their own |
-| Viewer | Read-only access |
-| Service | API-key-based machine integration |
-
-**Separation of Duties:** Users cannot approve their own payment requests.
-
-## Fraud Detection & Policy Engine
-
-The rules-based engine evaluates payment risk using:
-
-- Transaction spending limits
-- Risk tiers and blocklists
-- Merchant categories
-- Business-hour restrictions
-- Vendor payee changes
-- Lookalike domains
-- Duplicate invoices
-- Unusual transaction amounts
-- Transaction velocity
-
-### Enterprise Capabilities
-
-- N-of-M approval workflows with veto support
-- Agent spending mandates
-- Batch payment screening
-- Dry-run payment simulation
-- Idempotency keys
-- Audit-chain verification
-- CSV audit exports
-- HMAC-signed outbound webhooks
-- Payment analytics
-
-Duplicate-invoice and agent-budget checks run inside organization-locked transactions to prevent concurrent requests from bypassing controls.
-
-## Project Structure
-
-```text
-backend/
-└── payguard/
-    ├── main.py
-    ├── app/
-    │   ├── config.py
-    │   ├── db.py
-    │   ├── security.py
-    │   ├── models.py
-    │   ├── engine.py
-    │   ├── service.py
-    │   ├── audit.py
-    │   ├── events.py
-    │   ├── paypal.py
-    │   ├── mailer.py
-    │   └── routers/
-    ├── tests/
-    ├── Dockerfile
-    ├── docker-compose.yml
-    ├── requirements.txt
-    ├── requirements-dev.txt
-    ├── render.yaml
-    └── README.md
-```
-
-## Testing
-
-Install development dependencies:
-
-```bash
-pip install -r requirements-dev.txt
-```
-
-Run tests:
-
-```bash
-pytest
-```
-
-The project includes 67 tests and a route-coverage guard for the 54 API operations.
-
-## Deployment on Render
-
-The project includes a `render.yaml` Blueprint configuration for deploying the API and PostgreSQL database.
-
-Deployment configuration:
-
-- Runtime: Docker
-- API framework: FastAPI
-- Database: PostgreSQL
-- Health check: `/ready`
-- Environment: Production
-
-### Required Environment Variables
-
-| Variable | Purpose |
-|---|---|
-| `APP_ENV` | Application environment |
-| `DATABASE_URL` | PostgreSQL connection |
-| `JWT_SECRET` | JWT signing secret |
-| `ADMIN_KEY` | Administrative API key |
-| `PUBLIC_URL` | Deployed API URL |
-| `CORS_ORIGINS` | Allowed frontend origins |
-
-### Optional PayPal Variables
-
-| Variable | Purpose |
-|---|---|
-| `PAYPAL_CLIENT_ID` | PayPal application client ID |
-| `PAYPAL_CLIENT_SECRET` | PayPal application secret |
-| `PAYPAL_WEBHOOK_ID` | PayPal webhook identifier |
-
-### PayPal Webhook Configuration
-
-Configure the following endpoint in the PayPal Developer Dashboard:
-
-```text
-https://<your-app-url>/api/webhooks/paypal
-```
-
-Supported events:
-
-- `CHECKOUT.ORDER.APPROVED`
-- `PAYMENT.CAPTURE.COMPLETED`
-
-## API Health Checks
-
-| Endpoint | Description |
-|---|---|
-| `/health` | Application health status |
-| `/ready` | Database readiness check |
-| `/docs` | Interactive API documentation |
-
-## Operational Notes
-
-- Rate limiting is maintained in memory per process.
-- Multi-instance deployments should use a shared rate limiter such as Redis or an API gateway.
-- If PayPal is unavailable after approval, the payment is flagged as `needs_release`.
-- Retry payment release using `POST /api/payments/{id}/release`.
-- Enable `TRUST_PROXY=true` only behind a trusted reverse proxy.
-
-## API Reference
-
-PayGuard exposes 54 API operations across authentication, users, payments, enterprise management, webhooks, and system health.
-
-Full request and response schemas are available through the interactive Swagger documentation at `/docs`.
+# PayGuard 🛡️
+> **"Your money. Your rules. Your protection."**  
+> *AI detects the scam. PayGuard explains the risk. You stay in control.*
+
+PayGuard is a modern, premium AI-powered payment security platform built to protect individuals, families, and small businesses from predatory payment scams, fraudulent invoices, and unconstrained autonomous AI shopping agents.
 
 ---
+
+## 🚀 Live Demo & Getting Started
+
+### 1. Prerequisites
+Ensure you have Node.js (v18+ or v20+) installed.
+
+### 2. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### 3. Production Build & Preview
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## 🌟 Key Product Features
+
+### 1. Overview Dashboard (Security Operations Center)
+- **Real-time KPI Metrics**:
+  - **Total Payments Protected** ($42,850.00 / 148 verified transactions)
+  - **Scams Detected** (37 attacks intercepted / 100% loss prevention)
+  - **Money Saved** ($12,480.00 prevented losses)
+  - **AI Agent Spending This Week** ($142.50 of $250.00 weekly budget)
+- **Interactive Visualizations**:
+  - **Weekly Spending Chart**: Recharts Area Chart comparing safe manual volume vs. autonomous AI agent checkouts.
+  - **Fraud Threat Category Distribution**: Interactive donut chart detailing brand impersonation, urgent renewal scams, and micro-charge phishing.
+- **PayPal Sandbox Status Banner**: Live simulated REST API v2 webhook receiver status (`/v1/paypal-intercept`).
+- **Recent Intercepted & Cleared Transactions**: Audit summary with one-click deep drill-down.
+
+### 2. AI Scam & Fraud Analyzer (`/scam-detection`)
+- **Multi-Vector Analysis Form**:
+  - Enter Invoice Description, Sender Name, Sender Email, Amount, and Urgency message.
+  - Or click one of the **4 Quick Scenario Presets**:
+    - *Geek Squad Fake Renewal (Critical Risk)*
+    - *Urgent CEO Impersonation Wire (High Risk)*
+    - *Suspicious Cloud Storage Overage (Medium Risk)*
+    - *Legitimate SaaS Invoice (Low Risk)*
+- **AI-Style Output Card**:
+  - **Risk Score (0–100)** with dynamic SVG gauge indicator.
+  - **Risk Level**: Low, Medium, High, Critical.
+  - **Detected Fraud Signals**: Fake urgency, mismatched sender domain, pricing anchor trap ($299-$499), off-platform phone coercion.
+  - **AI Plain-Language Risk Breakdown**: Explains the danger simply, avoiding obscure jargon, plus details on how scammers execute the attack.
+  - **Action Controls**:
+    - `Hold Payment (24h Escrow)`
+    - `Approve Payment`
+    - `Block & Blacklist Sender`
+    - `Notify Trusted Contact`
+
+### 3. AI Spending Guard (`/spending-guard`)
+- **Autonomous Agent Budget Guardrails**:
+  - Weekly limit progress bar with real-time remaining budget calculation.
+  - **Emergency AI Kill-Switch**: Master toggle to halt all agent purchasing instantly across all connected bots (AutoGPT, Perplexity Buy, ChatGPT Operator).
+- **Spending Rules Engine**:
+  - Add, edit, delete, and toggle category-specific spending rules.
+  - Configurable max per transaction, weekly cap, and 2-party authorization thresholds.
+- **Purchase Verification Simulator**:
+  - Test simulated agent purchase requests.
+  - Real-time rule evaluation returns immediate **APPROVED**, **BLOCKED**, or **HELD** verification status with full reasoning and budget projection.
+- **AI Agent Purchase History**: Complete audit table of previous autonomous orders.
+
+### 4. Trusted Circle & Family Guard (`/trusted-circle`)
+- **Multi-Party Authorization System**:
+  - Protects elderly family members, teenagers, and business accounts from unilateral scam authorizations.
+  - Approver cards with relationship, contact info, status, and permissions.
+  - "Add Trusted Contact" modal form with real-time validation.
+- **Pending Approvals Queue**:
+  - Interactive cards for high-risk or escrow-held payments.
+  - Approver can click **Authorize Payment** or **Block & Decline**, updating global statistics and transaction history in real-time.
+
+### 5. Transaction Audit Trail (`/transactions`)
+- Complete immutable record of all PayPal Sandbox captures and AI intercepts.
+- Search by ID, sender, email, or invoice memo.
+- Multi-dimensional filters (Status, Risk Level, Source: PayPal vs. AI Agent).
+- **Transaction Details Modal**:
+  - Full AI explanation
+  - Behavioral signature tags
+  - Immutable audit trail
+  - Expandable raw PayPal Sandbox webhook JSON payload
+- **CSV Log Export**: One-click export to `.csv`.
+
+### 6. Settings & Localization (`/settings`)
+- **Tri-Lingual Localization**: Switch instantly between **English**, **Hindi (हिन्दी)**, and **Marathi (मराठी)**.
+- **PayPal Sandbox Credentials**: Configurable client ID, webhook URLs, and real-time sandbox round-trip ping latency tester.
+- **Security Thresholds**: Auto-quarantine score sliders, escrow timer hours, and AI engine selector (Gemini 2.0 Flash, Gemini 1.5 Pro, GPT-4o, Claude 3.5 Sonnet).
+- **Persistent Demo State**: Stores transactions, rules, contacts, and preferences in `localStorage` with a 1-click **Reset Demo Data** option.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS, Custom Fintech Navy & Emerald Palette, Inter font
+- **Icons**: Lucide React
+- **Charts**: Recharts (Responsive Area & Donut charts)
+- **Service Layer**: `src/services/payguardService.ts` (Ready for PayPal Sandbox REST v2 & Google Gemini 2.0 API integration)
+- **State Management**: React Context with LocalStorage persistence (`PayGuardContext`)
+- **Internationalization**: `src/i18n/translations.ts` (English, Hindi, Marathi)
+
+---
+
+## 🔌 PayPal Sandbox & LLM API Integration Guide
+
+To connect PayGuard to live sandbox credentials:
+1. Open [`src/services/payguardService.ts`](file:///c:/Users/user/Downloads/PayGuard/src/services/payguardService.ts).
+2. Replace mock endpoints in `analyzePayment()` with your Google Gemini API key or backend endpoint.
+3. Configure your PayPal Developer Sandbox Webhook to route to `https://your-domain.com/v1/paypal-intercept`.
 
 **PayGuard Enterprise API**  
 *Secure Payments. Intelligent Risk Control. Trusted Approvals.*
