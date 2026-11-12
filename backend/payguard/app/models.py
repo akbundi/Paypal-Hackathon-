@@ -186,3 +186,100 @@ class VendorIn(BaseModel):
 class VendorPatch(BaseModel):
     email: Optional[str] = Field(None, pattern=EMAIL, max_length=254)
     trusted: Optional[bool] = None
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional, Set
+
+
+class RequestStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    AUTO_APPROVED = "AUTO_APPROVED"
+    BLOCKED = "BLOCKED"
+
+
+class CategoryRuleType(str, Enum):
+    ALLOW = "ALLOW"
+    DENY = "DENY"
+    REQUIRE_APPROVAL = "REQUIRE_APPROVAL"
+
+
+class NotificationChannel(str, Enum):
+    EMAIL = "EMAIL"
+    SMS = "SMS"
+    PUSH = "PUSH"
+    IN_APP = "IN_APP"
+
+
+@dataclass
+class TrustedContact:
+    contact_id: str
+    name: str
+    relationship: str  # e.g., "Parent", "Spouse", "Guardian"
+    email: str
+    phone: Optional[str] = None
+    is_approver: bool = True
+    approval_limit: Optional[float] = None  # None indicates full limit up to policy
+
+
+@dataclass
+class PurchaseItem:
+    item_id: str
+    name: str
+    category: str
+    price: float
+    quantity: int = 1
+    merchant: Optional[str] = None
+
+    @property
+    def total_price(self) -> float:
+        return self.price * self.quantity
+
+
+@dataclass
+class PaymentRequest:
+    request_id: str
+    agent_id: str
+    user_id: str
+    items: List[PurchaseItem]
+    merchant: str
+    status: RequestStatus = RequestStatus.PENDING
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    decided_at: Optional[datetime] = None
+    decision_reason: Optional[str] = None
+    decided_by: Optional[str] = None  # contact_id or "SYSTEM"
+
+    @property
+    def total_amount(self) -> float:
+        return sum(item.total_price for item in self.items)
+
+    @property
+    def categories(self) -> Set[str]:
+        return {item.category.lower() for item in self.items}
+
+
+@dataclass
+class CategoryRule:
+    category: str
+    rule_type: CategoryRuleType = CategoryRuleType.ALLOW
+    per_item_max_price: Optional[float] = None
+    require_trusted_contact_approval: bool = False
+
+
+@dataclass
+class SpendingPolicy:
+    policy_id: str
+    user_id: str
+    single_transaction_limit: float = 100.0
+    auto_approve_threshold: float = 25.0
+    daily_budget: Optional[float] = None
+    weekly_budget: float = 300.0
+    monthly_budget: float = 1000.0
+    allowed_merchants: Optional[List[str]] = None
+    blocked_merchants: List[str] = field(default_factory=list)
+    category_rules: Dict[str, CategoryRule] = field(default_factory=dict)
+    trusted_contacts: List[TrustedContact] = field(default_factory=list)
+
+    
