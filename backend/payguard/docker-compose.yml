@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    environment: {POSTGRES_USER: payguard, POSTGRES_PASSWORD: payguard, POSTGRES_DB: payguard}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U payguard"], interval: 5s, timeout: 3s, retries: 10}
+  api:
+    build: .
+    depends_on: {db: {condition: service_healthy}}
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://payguard:payguard@db:5432/payguard
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string-please}
+      ADMIN_KEY: ${ADMIN_KEY:-change-me-admin}
+      PUBLIC_URL: http://localhost:8000
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+volumes:
+  pgdata:
