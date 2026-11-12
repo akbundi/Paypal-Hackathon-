@@ -11,6 +11,16 @@ from app.spending_control import policy_engine
 
 router = APIRouter(prefix="/api/paypal", tags=["PayPal"])
 
+_fraud_engine = None
+
+
+def _get_fraud_engine():
+    global _fraud_engine
+    if _fraud_engine is None:
+        from app.fraud_detection.analyzer import ScamDetectionEngine
+        _fraud_engine = ScamDetectionEngine()
+    return _fraud_engine
+
 
 class CreateOrderRequest(BaseModel):
     amount: Decimal = Field(gt=0)
@@ -18,6 +28,9 @@ class CreateOrderRequest(BaseModel):
     agent_id: Optional[str] = None
     category: Optional[str] = None
     merchant: Optional[str] = None
+    recipient_name: Optional[str] = None
+    sender_email: Optional[str] = None
+    invoice_description: Optional[str] = None
 
 
 class CapturePaymentRequest(BaseModel):
@@ -26,6 +39,29 @@ class CapturePaymentRequest(BaseModel):
 
 @router.post("/create-order")
 def create_paypal_order(data: CreateOrderRequest):
+    # Gate 1: fraud check, sirf jab invoice details aayein
+    if data.merchant and data.sender_email and data.invoice_description:
+        from app.fraud_detection.models import InvoiceRequest
+        result = _get_fraud_engine().analyze_invoice(
+            InvoiceRequest(
+                merchant_name=data.merchant,
+                recipient_name=data.recipient_name or "Customer",
+                sender_email=data.sender_email,
+                amount=float(data.amount),
+                currency=data.currency,
+                invoice_description=data.invoice_description,
+            )
+        )
+        if str(result.decision) != "APPROVE":
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "status": "blocked",
+                    "reasons": [f"Fraud check: {result.decision} (score {result.risk_score})"],
+                },
+            )
+
+    # Gate 2: spending check, sirf jab agent_id aaye
     if data.agent_id:
         decision = policy_engine.evaluate(
             data.agent_id,
@@ -101,4 +137,3 @@ async def paypal_webhook(request: Request):
             status_code=400,
             detail="Webhook processing failed"
         )
-
