@@ -6,24 +6,6 @@ PayGuard is a modern, premium AI-powered payment security platform built to prot
 
 ---
 
-## 🚀 Live Demo & Getting Started
-
-### 1. Prerequisites
-Ensure you have Node.js (v18+ or v20+) installed.
-
-### 2. Run the Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### 3. Production Build & Preview
-```bash
-npm run build
-npm run preview
-```
-
----
 
 ## 🌟 Key Product Features
 
@@ -98,15 +80,7 @@ npm run preview
 
 ---
 
-## 🛠️ Tech Stack & Architecture
 
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS, Custom Fintech Navy & Emerald Palette, Inter font
-- **Icons**: Lucide React
-- **Charts**: Recharts (Responsive Area & Donut charts)
-- **Service Layer**: `src/services/payguardService.ts` (Ready for PayPal Sandbox REST v2 & Google Gemini 2.0 API integration)
-- **State Management**: React Context with LocalStorage persistence (`PayGuardContext`)
-- **Internationalization**: `src/i18n/translations.ts` (English, Hindi, Marathi)
 
 ---
 
