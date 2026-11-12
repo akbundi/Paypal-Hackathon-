@@ -1,12 +1,15 @@
+
 databases:
   - name: payguard-db
     plan: free
     databaseName: payguard
     user: payguard
+
 services:
   - type: web
     name: payguard-api
     runtime: docker
+    rootDir: backend/payguard
     healthCheckPath: /ready
     envVars:
       - {key: APP_ENV, value: production}
